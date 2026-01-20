@@ -23,7 +23,7 @@
         .btn-start {
             font-size: 22px; color: white; background: rgba(255,255,255,0.1);
             padding: 15px 40px; border-radius: 50px; border: 2px solid #ff4081;
-            font-family: 'Galada', cursive; /* বাটন ফন্ট স্টাইলিশ */
+            font-family: 'Galada', cursive;
             animation: pulse 1.5s infinite;
         }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
@@ -46,7 +46,7 @@
     const ctx = canvas.getContext('2d');
     let width, height;
 
-    // --- ২১ সেকেন্ডের জন্য ৫টি লাইন (টাইমিং ঠিক করা আছে) ---
+    // --- লাইনগুলো (সময় বাড়ানো হয়েছে) ---
     const letters = [
         "হে আমার প্রিয়তমা, আমার প্রেয়সী সুলতানা, আমার সম্রাজ্ঞী হুররাম...",
         "অহর্নিশি যার বিরহে আমি কাতর...",
@@ -70,7 +70,6 @@
     // স্টারস
     let stars = [];
 
-    // --- রিসাইজ ---
     function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
@@ -132,7 +131,7 @@
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
 
-        // তারা (মিটমিট করবে)
+        // তারা
         ctx.fillStyle = "white";
         stars.forEach(s => {
             ctx.globalAlpha = Math.abs(Math.sin(Date.now() * 0.002 + s.x));
@@ -140,7 +139,7 @@
         });
         ctx.globalAlpha = 1.0;
 
-        // চাঁদ (উজ্জ্বল)
+        // চাঁদ
         ctx.shadowBlur = 60; ctx.shadowColor = "#fdfd96";
         ctx.fillStyle = "#fff";
         ctx.beginPath(); ctx.arc(100, 100, 45, 0, Math.PI*2); ctx.fill();
@@ -156,7 +155,7 @@
         ctx.fill();
     }
 
-    // সুজন (Silhouette)
+    // সুজন
     function drawBoy(x, y, isHugging) {
         ctx.save();
         ctx.translate(x, y);
@@ -171,7 +170,6 @@
         ctx.fillRect(-18, -50, 14, 60); 
         ctx.fillRect(2, -50, 14, 60); 
         ctx.beginPath(); ctx.arc(0 + lean, -145, 18, 0, Math.PI*2); ctx.fill();
-        // হাত
         ctx.strokeStyle = "#000"; ctx.lineWidth = 8; ctx.lineCap = "round";
         ctx.beginPath();
         if(isHugging) {
@@ -182,7 +180,7 @@
         ctx.restore();
     }
 
-    // নুসরাত (Silhouette)
+    // নুসরাত
     function drawGirl(x, y, isHugging) {
         ctx.save();
         ctx.translate(x, y);
@@ -195,7 +193,6 @@
         ctx.lineTo(-25 + lean, 0); 
         ctx.fill();
         ctx.beginPath(); ctx.arc(0 + lean, -135, 16, 0, Math.PI*2); ctx.fill();
-        // চুল
         ctx.beginPath();
         let hairX = -10 + lean; 
         for(let i=0; i<6; i++) {
@@ -203,7 +200,6 @@
             ctx.arc(hairX - 5, -135 + (i*8), 8, 0, Math.PI*2);
         }
         ctx.fill();
-        // হাত
         ctx.strokeStyle = "#000"; ctx.lineWidth = 6; ctx.lineCap = "round";
         ctx.beginPath();
         if(isHugging) {
@@ -216,10 +212,8 @@
 
     // ডায়ালগ বাবল
     function drawBubble(text, x, y, alignLeft) {
-        // ডায়ালগের ফন্ট একটু অন্যরকম ( Hind Siliguri Bold )
         let fontSize = Math.min(20, width / 26);
         ctx.font = "600 " + fontSize + "px 'Hind Siliguri'";
-        
         let maxWidth = Math.min(280, width * 0.85);
         let lines = wrapText(ctx, text, maxWidth);
         let maxW = 0;
@@ -236,13 +230,11 @@
         if (bx < 10) bx = 10;
         if (bx + w > width - 10) bx = width - w - 10;
 
-        // বাবল স্টাইল
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         ctx.shadowBlur = 10; ctx.shadowColor = "rgba(255, 64, 129, 0.4)";
         ctx.beginPath(); ctx.roundRect(bx, by, w, h, 15); ctx.fill();
         ctx.shadowBlur = 0;
         
-        // লেজ
         ctx.beginPath();
         if (alignLeft) {
              ctx.moveTo(bx + w - 20, by + h); ctx.lineTo(x - 10, y - 150); ctx.lineTo(bx + w - 40, by + h);
@@ -251,7 +243,7 @@
         }
         ctx.fill();
 
-        ctx.fillStyle = "#c2185b"; // লেখার রঙ গাঢ় গোলাপি
+        ctx.fillStyle = "#c2185b";
         ctx.textAlign = "center";
         let textY = by + lineHeight;
         lines.forEach(line => {
@@ -265,13 +257,12 @@
         ctx.clearRect(0, 0, width, height);
         drawScene();
 
-        // ১. চিঠি পড়া (নতুন ফন্ট 'Galada')
+        // ১. চিঠি পড়া (টাইমিং স্লো করা হয়েছে)
         if(state === "letter") {
             drawBoy(width/2 - (width < 500 ? 100 : 250), groundY, false);
             drawGirl(width/2 + (width < 500 ? 100 : 250), groundY, false);
 
             ctx.fillStyle = `rgba(255, 255, 255, ${textAlpha})`;
-            // এখানে চিঠির জন্য নতুন ফন্ট ব্যবহার করা হয়েছে
             let fontSize = Math.min(32, width/18);
             ctx.font = fontSize + "px 'Galada', cursive"; 
             ctx.textAlign = "center";
@@ -285,12 +276,13 @@
             });
             ctx.shadowBlur = 0;
 
-            // টাইমিং: ২১ সেকেন্ড / ৫ লাইন = ৪.২ সেকেন্ড পার লাইন
+            // --- পরিবর্তন: সময় বাড়ানো হয়েছে ---
             if(fadeDir === 1) {
-                textAlpha += 0.015; // ১ সেকেন্ডে দৃশ্যমান
-                if(textAlpha >= 1) { fadeDir = 0; setTimeout(() => fadeDir = -1, 2500); } // ২.৫ সেকেন্ড স্থির
+                textAlpha += 0.01; // ধীরে আসবে (আগে ০.০১৫ ছিল)
+                // লেখা স্ক্রিনে থাকবে ৪.৫ সেকেন্ড (আগে ২.৫ ছিল) = ২ সেকেন্ড বেড়েছে
+                if(textAlpha >= 1) { fadeDir = 0; setTimeout(() => fadeDir = -1, 4500); } 
             } else if(fadeDir === -1) {
-                textAlpha -= 0.03; // ০.৭ সেকেন্ডে মিলিয়ে যাবে
+                textAlpha -= 0.02; // ধীরে মুছবে
                 if(textAlpha <= 0) {
                     textIdx++;
                     if(textIdx >= letters.length) state = "walking";
@@ -299,9 +291,9 @@
             }
         }
 
-        // ২. দৌড়ে কাছে আসা (Running)
+        // ২. দৌড়ে কাছে আসা
         else if(state === "walking") {
-            if(boyX < meetX - 25) boyX += 5; // দৌড়ানোর গতি
+            if(boyX < meetX - 25) boyX += 5;
             if(girlX > meetX + 25) girlX -= 5;
             
             drawBoy(boyX, groundY, false);
@@ -309,22 +301,20 @@
 
             if(Math.abs(boyX - (meetX - 25)) < 6 && Math.abs(girlX - (meetX + 25)) < 6) {
                 state = "hugging";
-                changeMusic(); // গান চেঞ্জ হবে
+                changeMusic();
             }
         }
 
-        // ৩. জড়িয়ে ধরা ও ডায়ালগ
+        // ৩. জড়িয়ে ধরা
         else if(state === "hugging") {
             drawBoy(meetX - 15, groundY, true);
             drawGirl(meetX + 15, groundY, true);
 
             textTimer++;
 
-            // সুজনের ডায়ালগ
             if(textTimer > 50 && textTimer < 350) {
                 drawBubble("আমি তোমাকে ভালোবাসি নুসরাত, তুমি আমার সব। ❤️", meetX, groundY, true);
             }
-            // নুসরাতের উত্তর
             else if(textTimer > 350) {
                 drawBubble("আমিও আপনাকে ভালোবাসি। 💑", meetX, groundY, false);
                 if(Math.random() < 0.3) createHeart();
