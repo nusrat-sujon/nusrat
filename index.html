@@ -46,17 +46,16 @@
     const ctx = canvas.getContext('2d');
     let width, height;
 
-    // --- ডায়নামিক টাইমিং সেটআপ (msg = লেখা, time = কতক্ষণ স্থির থাকবে) ---
-    // মোট সময় মেলাতে ফেড ইন/আউট টাইম বাদে 'time' ভ্যালু দেওয়া হয়েছে।
+    // --- ৮টি লাইন (অক্ষরের অনুপাতে ২১ সেকেন্ড ভাগ করা হয়েছে) ---
     const letters = [
-        { msg: "হে আমার প্রিয়তমা,", time: 1000 },                 // ছোট লাইন
-        { msg: "আমার প্রেয়সী সুলতানা", time: 1500 },               // মাঝারি
-        { msg: "আমার সম্রাজ্ঞী হুররাম...", time: 1500 },            // মাঝারি
-        { msg: "অহর্নিশি যার বিরহে আমি কাতর...", time: 2200 },      // বড় লাইন
-        { msg: "আমার সব আনন্দের উৎস,", time: 1200 },               // ছোট-মাঝারি
-        { msg: "আমার কষ্টের একমাত্র নিরাময় হুররাম।", time: 2500 }, // বড় লাইন
-        { msg: "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...", time: 2800 }, // সবচেয়ে বড়
-        { msg: "বারবার তোমাকে দেখার...", time: 1200 }              // শেষ লাইন
+        { msg: "হে আমার প্রিয়তমা,", time: 1800 },
+        { msg: "আমার প্রেয়সী সুলতানা", time: 2200 },
+        { msg: "আমার সম্রাজ্ঞী হুররাম...", time: 2400 },
+        { msg: "অহর্নিশি যার বিরহে আমি কাতর...", time: 3100 },
+        { msg: "আমার সব আনন্দের উৎস,", time: 2200 },
+        { msg: "আমার কষ্টের একমাত্র নিরাময় হুররাম।", time: 3500 },
+        { msg: "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...", time: 5100 },
+        { msg: "তোমাকে", time: 700 }
     ];
 
     let state = "idle";
@@ -232,7 +231,7 @@
         ctx.clearRect(0, 0, width, height);
         drawScene();
 
-        // ১. চিঠি পড়া (ডায়নামিক টাইমিং)
+        // ১. চিঠি পড়া (টাইমিং কাস্টমাইজড)
         if(state === "letter") {
             drawBoy(width/2 - (width < 500 ? 100 : 250), groundY, false);
             drawGirl(width/2 + (width < 500 ? 100 : 250), groundY, false);
@@ -243,7 +242,6 @@
             ctx.textAlign = "center";
             ctx.shadowColor = "#ff4081"; ctx.shadowBlur = 15;
             
-            // letters[textIdx].msg ব্যবহার করা হচ্ছে
             let currentText = letters[textIdx].msg;
             let maxWidth = width * 0.9;
             let lines = wrapText(ctx, currentText, maxWidth);
@@ -254,14 +252,13 @@
             ctx.shadowBlur = 0;
 
             if(fadeDir === 1) {
-                textAlpha += 0.03; // ফেড ইন (দ্রুত)
+                textAlpha += 0.03; 
                 if(textAlpha >= 1) { 
                     fadeDir = 0; 
-                    // নির্দিষ্ট লাইনের জন্য নির্দিষ্ট সময় অপেক্ষা
                     setTimeout(() => fadeDir = -1, letters[textIdx].time); 
                 } 
             } else if(fadeDir === -1) {
-                textAlpha -= 0.03; // ফেড আউট
+                textAlpha -= 0.03; 
                 if(textAlpha <= 0) {
                     textIdx++;
                     if(textIdx >= letters.length) state = "walking";
@@ -270,10 +267,10 @@
             }
         }
 
-        // ২. দৌড়ে কাছে আসা
+        // ২. দৌড়ে কাছে আসা (স্লো করা হয়েছে: 2.5 স্পিড)
         else if(state === "walking") {
-            if(boyX < meetX - 25) boyX += 5;
-            if(girlX > meetX + 25) girlX -= 5;
+            if(boyX < meetX - 25) boyX += 2.5;
+            if(girlX > meetX + 25) girlX -= 2.5;
             drawBoy(boyX, groundY, false);
             drawGirl(girlX, groundY, false);
             if(Math.abs(boyX - (meetX - 25)) < 6 && Math.abs(girlX - (meetX + 25)) < 6) {
@@ -282,14 +279,18 @@
             }
         }
 
-        // ৩. জড়িয়ে ধরা
+        // ৩. জড়িয়ে ধরা (৫ সেকেন্ডের বেশি সময় দেওয়া হয়েছে)
         else if(state === "hugging") {
             drawBoy(meetX - 15, groundY, true);
             drawGirl(meetX + 15, groundY, true);
             textTimer++;
-            if(textTimer > 50 && textTimer < 350) {
+
+            // সুজনের ডায়ালগ (৬০ ফ্রেম থেকে ৩৬০ ফ্রেম = ৫ সেকেন্ডের বেশি)
+            if(textTimer > 60 && textTimer < 400) {
                 drawBubble("আমি তোমাকে ভালোবাসি নুসরাত, তুমি আমার সব। ❤️", meetX, groundY, true);
-            } else if(textTimer > 350) {
+            } 
+            // নুসরাতের ডায়ালগ
+            else if(textTimer > 400) {
                 drawBubble("আমিও আপনাকে ভালোবাসি। 💑", meetX, groundY, false);
                 if(Math.random() < 0.3) createHeart();
                 updateHearts();
