@@ -6,30 +6,36 @@
     <title>Sujon & Nusrat Love Story</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Hind Siliguri', sans-serif; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Hind Siliguri', sans-serif; user-select: none; }
         canvas { display: block; }
 
         /* স্টার্ট স্ক্রিন */
         #overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, #1a1a2e, #16213e);
+            background: linear-gradient(to bottom, #141e30, #243b55);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 10; cursor: pointer; color: white; transition: opacity 1s;
-            text-align: center; padding: 20px;
+            z-index: 100; cursor: pointer; transition: opacity 0.8s;
         }
-        .title { font-size: 40px; font-family: 'Dancing Script', cursive; color: #ff4081; margin-bottom: 20px; text-shadow: 0 0 10px #ff4081; }
-        .hint { font-size: 18px; border: 1px solid rgba(255,255,255,0.5); padding: 10px 25px; border-radius: 50px; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1); } 100% { opacity: 0.5; transform: scale(0.95); } }
+        .title { 
+            font-size: 40px; font-family: 'Dancing Script', cursive; color: #ff4081; 
+            margin-bottom: 20px; text-shadow: 0 0 15px rgba(255, 64, 129, 0.7); 
+        }
+        .btn-start {
+            font-size: 20px; color: white; background: rgba(255,255,255,0.1);
+            padding: 12px 35px; border-radius: 50px; border: 2px solid #ff4081;
+            animation: pulse 1.5s infinite; font-weight: bold;
+        }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 64, 129, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 64, 129, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 64, 129, 0); } }
     </style>
 </head>
 <body>
 
-<audio id="sultan" src="sultan.mp3"></audio>
-<audio id="tujhe" src="tujhe.mp3"></audio>
+<audio id="sultan" src="sultan.mp3" preload="auto"></audio>
+<audio id="tujhe" src="tujhe.mp3" preload="auto"></audio>
 
 <div id="overlay" onclick="startStory()">
     <div class="title">Sujon ❤️ Nusrat</div>
-    <div class="hint">Click to Start Love Story</div>
+    <div class="btn-start">গল্প শুরু করতে ক্লিক করুন 🎵</div>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -39,22 +45,23 @@
     const ctx = canvas.getContext('2d');
     let width, height;
 
-    // --- কনফিগারেশন ---
+    // --- ২১ সেকেন্ডের জন্য ৫টি লাইন ---
     const letters = [
-        "হে আমার প্রিয়তমা...",
-        "আমার হৃদয়ের স্পন্দন, চোখের জ্যোতি,",
-        "তোমাকে ছাড়া এ জীবন অর্থহীন,",
-        "তুমিই আমার শুরু, তুমিই আমার শেষ।"
+        "হে আমার প্রিয়তমা, আমার প্রেয়সী সুলতানা, আমার সম্রাজ্ঞী হুররাম...",
+        "অহর্নিশি যার বিরহে আমি কাতর...",
+        "আমার সব আনন্দের উৎস, আমার কষ্টের একমাত্র নিরাময় হুররাম।",
+        "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...",
+        "বারবার তোমাকে দেখার তৃষ্ণা আমাকে ব্যাকুল করে তোলে..."
     ];
 
-    let state = "idle"; 
+    let state = "idle";
     let textIdx = 0;
     let textAlpha = 0;
     let fadeDir = 1;
     let textTimer = 0;
     
     // ক্যারেকটার পজিশন
-    let boyX = -100;
+    let boyX = -150;
     let girlX = 0;
     let groundY = 0;
     let meetX = 0;
@@ -62,7 +69,7 @@
     // স্টারস
     let stars = [];
 
-    // --- সেটআপ ---
+    // --- রিসাইজ ---
     function resize() {
         width = window.innerWidth;
         height = window.innerHeight;
@@ -70,7 +77,7 @@
         canvas.height = height;
         groundY = height - 100;
         meetX = width / 2;
-        if(state === "idle") girlX = width + 100;
+        if(state === "idle") girlX = width + 150;
         
         stars = [];
         for(let i=0; i<150; i++) {
@@ -82,28 +89,28 @@
 
     // --- স্টার্ট ---
     function startStory() {
-        document.getElementById('overlay').style.opacity = 0;
-        setTimeout(() => document.getElementById('overlay').style.display = 'none', 1000);
-        
         const sultan = document.getElementById('sultan');
         sultan.volume = 1.0;
-        sultan.play().catch(e => console.log("Audio file missing"));
         
-        state = "letter";
-        animate();
+        sultan.play().then(() => {
+            document.getElementById('overlay').style.opacity = 0;
+            setTimeout(() => document.getElementById('overlay').style.display = 'none', 800);
+            state = "letter";
+            animate();
+        }).catch(error => {
+            alert("গান বাজছে না! আপনার ফোল্ডারে 'sultan.mp3' ফাইলটি আছে কি না দেখুন।");
+        });
     }
 
-    // --- টেক্সট র‍্যাপিং ফাংশন (নতুন যোগ করা হয়েছে) ---
-    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+    // --- টেক্সট র‍্যাপিং ---
+    function wrapText(context, text, maxWidth) {
         let words = text.split(' ');
-        let line = '';
         let lines = [];
-
+        let line = '';
         for(let n = 0; n < words.length; n++) {
             let testLine = line + words[n] + ' ';
             let metrics = context.measureText(testLine);
-            let testWidth = metrics.width;
-            if (testWidth > maxWidth && n > 0) {
+            if (metrics.width > maxWidth && n > 0) {
                 lines.push(line);
                 line = words[n] + ' ';
             } else {
@@ -147,26 +154,21 @@
         ctx.fill();
     }
 
-    // সুজন (Silhouette)
+    // সুজন
     function drawBoy(x, y, isHugging) {
         ctx.save();
         ctx.translate(x, y);
         ctx.fillStyle = "#000";
-
-        let lean = isHugging ? 5 : 0;
-        // শরীর
+        let lean = isHugging ? 10 : 0; 
         ctx.beginPath();
         ctx.moveTo(-15, -130); 
         ctx.quadraticCurveTo(20 + lean, -130, 25 + lean, -50); 
         ctx.lineTo(-20 + lean, -50); 
         ctx.lineTo(-25, -130);
         ctx.fill();
-        // পা
         ctx.fillRect(-18, -50, 14, 60); 
-        ctx.fillRect(2, -50, 14, 60);
-        // মাথা
+        ctx.fillRect(2, -50, 14, 60); 
         ctx.beginPath(); ctx.arc(0 + lean, -145, 18, 0, Math.PI*2); ctx.fill();
-        // হাত
         ctx.strokeStyle = "#000"; ctx.lineWidth = 8; ctx.lineCap = "round";
         ctx.beginPath();
         if(isHugging) {
@@ -177,24 +179,19 @@
         ctx.restore();
     }
 
-    // নুসরাত (Silhouette + Back Hair)
+    // নুসরাত
     function drawGirl(x, y, isHugging) {
         ctx.save();
         ctx.translate(x, y);
         ctx.fillStyle = "#000";
-
-        let lean = isHugging ? -5 : 0;
-        // শরীর
+        let lean = isHugging ? -10 : 0;
         ctx.beginPath();
         ctx.moveTo(-12, -120); 
         ctx.quadraticCurveTo(15, -120, 15, -120); 
         ctx.lineTo(25 + lean, 0); 
         ctx.lineTo(-25 + lean, 0); 
         ctx.fill();
-        // মাথা
         ctx.beginPath(); ctx.arc(0 + lean, -135, 16, 0, Math.PI*2); ctx.fill();
-
-        // কোকড়ানো চুল (পেছনে)
         ctx.beginPath();
         let hairX = -10 + lean; 
         for(let i=0; i<6; i++) {
@@ -202,8 +199,6 @@
             ctx.arc(hairX - 5, -135 + (i*8), 8, 0, Math.PI*2);
         }
         ctx.fill();
-
-        // হাত
         ctx.strokeStyle = "#000"; ctx.lineWidth = 6; ctx.lineCap = "round";
         ctx.beginPath();
         if(isHugging) {
@@ -214,135 +209,111 @@
         ctx.restore();
     }
 
-    // স্মার্ট ডায়ালগ বাবল (ফিক্সড)
+    // ডায়ালগ বাবল
     function drawBubble(text, x, y, alignLeft) {
-        // ফন্ট সাইজ রেসপন্সিভ করা
-        let fontSize = Math.min(20, width / 25);
+        let fontSize = Math.min(18, width / 28);
         ctx.font = fontSize + "px 'Hind Siliguri'";
-        
-        let maxWidth = Math.min(250, width * 0.8); // স্ক্রিনের ৮০% এর বেশি চওড়া হবে না
-        let lineHeight = fontSize + 10;
-        
-        // টেক্সট র‍্যাপ করা
-        let lines = wrapText(ctx, text, 0, 0, maxWidth, lineHeight);
-        
-        let w = maxWidth; // বক্সের উইডথ ফিক্সড বা কন্টেন্ট অনুযায়ী হতে পারে, এখানে সহজ করার জন্য ম্যাক্স রাখলাম
-        // আসলে বক্সের উইডথ মাপা উচিত সব লাইনের মধ্যে সবচেয়ে বড়টা
-        let maxLineWidth = 0;
+        let maxWidth = Math.min(250, width * 0.8);
+        let lines = wrapText(ctx, text, maxWidth);
+        let maxW = 0;
         lines.forEach(l => {
             let mw = ctx.measureText(l).width;
-            if(mw > maxLineWidth) maxLineWidth = mw;
+            if(mw > maxW) maxW = mw;
         });
-        w = maxLineWidth + 30;
-
+        let w = maxW + 30;
+        let lineHeight = fontSize + 10;
         let h = (lines.length * lineHeight) + 20;
-        
-        // পজিশন ক্যালকুলেশন (যাতে বাইরে না যায়)
         let bx = alignLeft ? x - w - 20 : x + 20;
         let by = y - 220;
 
-        // স্ক্রিনের বাইরে গেলে পজিশন ঠিক করা
         if (bx < 10) bx = 10;
         if (bx + w > width - 10) bx = width - w - 10;
 
-        // বাবল আঁকা
-        ctx.fillStyle = "rgba(255,255,255,0.9)";
-        ctx.beginPath();
-        ctx.roundRect(bx, by, w, h, 10);
-        ctx.fill();
-        
-        // লেজ (Bubble Tail) - এটা একটু ট্রিকি যখন পজিশন শিফট হয়, তাই সিম্পল রাখলাম
+        ctx.fillStyle = "rgba(255,255,255,0.95)";
+        ctx.beginPath(); ctx.roundRect(bx, by, w, h, 10); ctx.fill();
         ctx.beginPath();
         if (alignLeft) {
-             // লেজটা ক্যারেকটারের দিকে পয়েন্ট করবে
-             ctx.moveTo(bx + w - 10, by + h); 
-             ctx.lineTo(x - 10, y - 150); // ক্যারেকটারের মাথার কাছে
-             ctx.lineTo(bx + w - 30, by + h);
+             ctx.moveTo(bx + w - 10, by + h); ctx.lineTo(x - 10, y - 150); ctx.lineTo(bx + w - 30, by + h);
         } else {
-             ctx.moveTo(bx + 10, by + h); 
-             ctx.lineTo(x + 10, y - 150); 
-             ctx.lineTo(bx + 30, by + h);
+             ctx.moveTo(bx + 10, by + h); ctx.lineTo(x + 10, y - 150); ctx.lineTo(bx + 30, by + h);
         }
         ctx.fill();
 
-        // লেখা বসানো
         ctx.fillStyle = "#000";
         ctx.textAlign = "center";
         let textY = by + lineHeight;
-        
         lines.forEach(line => {
             ctx.fillText(line, bx + w/2, textY - 5);
             textY += lineHeight;
         });
     }
 
-    // --- মেইন লুপ ---
+    // --- এনিমেশন লুপ ---
     function animate() {
         ctx.clearRect(0, 0, width, height);
         drawScene();
 
-        // Phase 1: Letter
+        // ১. চিঠি পড়া (২১ সেকেন্ড টাইমিং)
         if(state === "letter") {
             drawBoy(width/2 - (width < 500 ? 100 : 250), groundY, false);
             drawGirl(width/2 + (width < 500 ? 100 : 250), groundY, false);
 
             ctx.fillStyle = `rgba(255, 255, 255, ${textAlpha})`;
-            // ফন্ট সাইজ রেসপন্সিভ
-            ctx.font = Math.min(30, width/20) + "px 'Hind Siliguri'";
+            ctx.font = Math.min(28, width/20) + "px 'Hind Siliguri'";
             ctx.textAlign = "center";
             ctx.shadowColor = "#ff4081"; ctx.shadowBlur = 10;
             
-            // চিঠির লেখা র‍্যাপ করা
             let maxWidth = width * 0.9;
-            let lines = wrapText(ctx, letters[textIdx], 0, 0, maxWidth, 40);
-            
+            let lines = wrapText(ctx, letters[textIdx], maxWidth);
             let startY = height/3;
             lines.forEach((line, i) => {
                 ctx.fillText(line, width/2, startY + (i * 40));
             });
-
             ctx.shadowBlur = 0;
 
+            // টেক্সট টাইমিং ক্যালকুলেশন (২১ সেকেন্ড / ৫ লাইন = ৪.২ সে/লাইন)
             if(fadeDir === 1) {
-                textAlpha += 0.005;
-                if(textAlpha >= 1) { fadeDir = 0; setTimeout(() => fadeDir = -1, 3000); }
+                textAlpha += 0.015; // ফাস্ট ফেড ইন (১ সেকেন্ডে)
+                if(textAlpha >= 1) { fadeDir = 0; setTimeout(() => fadeDir = -1, 2500); } // ২.৫ সেকেন্ড হোল্ড
             } else if(fadeDir === -1) {
-                textAlpha -= 0.01;
+                textAlpha -= 0.03; // কুইক ফেড আউট (০.৭ সেকেন্ডে)
                 if(textAlpha <= 0) {
                     textIdx++;
-                    if(textIdx >= letters.length) state = "walking";
+                    if(textIdx >= letters.length) state = "walking"; // লেখা শেষ হলে দৌড়
                     else fadeDir = 1;
                 }
             }
         }
 
-        // Phase 2: Walking
+        // ২. দৌড়ে কাছে আসা (Running)
         else if(state === "walking") {
-            if(boyX < meetX - 30) boyX += 1.5;
-            if(girlX > meetX + 30) girlX -= 1.5;
+            if(boyX < meetX - 25) boyX += 5; // দৌড়ানোর গতি
+            if(girlX > meetX + 25) girlX -= 5;
             
             drawBoy(boyX, groundY, false);
             drawGirl(girlX, groundY, false);
 
-            if(Math.abs(boyX - (meetX - 30)) < 2 && Math.abs(girlX - (meetX + 30)) < 2) {
+            if(Math.abs(boyX - (meetX - 25)) < 6 && Math.abs(girlX - (meetX + 25)) < 6) {
                 state = "hugging";
-                changeMusic();
+                changeMusic(); // গান চেঞ্জ হবে
             }
         }
 
-        // Phase 3: Hugging & Talking
+        // ৩. জড়িয়ে ধরা ও শেষ ডায়ালগ
         else if(state === "hugging") {
             drawBoy(meetX - 15, groundY, true);
             drawGirl(meetX + 15, groundY, true);
 
             textTimer++;
 
+            // সুজনের শেষ ডায়ালগ
             if(textTimer > 50 && textTimer < 350) {
-                drawBubble("আমি তোমাকে ভালোবাসি নুসরাত। তুমি আমার সব। ❤️", meetX, groundY, true);
+                drawBubble("আমি তোমাকে ভালোবাসি নুসরাত, তুমি আমার সব। ❤️", meetX, groundY, true);
             }
+            // নুসরাতের উত্তর
             else if(textTimer > 350) {
                 drawBubble("আমিও আপনাকে ভালোবাসি। 💑", meetX, groundY, false);
-                if(Math.random() < 0.2) createHeart();
+                if(Math.random() < 0.3) createHeart();
                 updateHearts();
             }
         }
@@ -350,6 +321,7 @@
         requestAnimationFrame(animate);
     }
 
+    // --- মিউজিক পরিবর্তন ---
     function changeMusic() {
         const s = document.getElementById('sultan');
         const t = document.getElementById('tujhe');
@@ -359,14 +331,16 @@
             else {
                 clearInterval(fadeOut);
                 s.pause();
+                
                 t.volume = 0;
-                t.play().catch(e => console.log("Tujhe missing"));
-                let fadeIn = setInterval(() => {
-                    if(t.volume < 0.9) t.volume += 0.1;
-                    else clearInterval(fadeIn);
-                }, 200);
+                t.play().then(() => {
+                    let fadeIn = setInterval(() => {
+                        if(t.volume < 0.9) t.volume += 0.1;
+                        else clearInterval(fadeIn);
+                    }, 200);
+                }).catch(e => console.log("Tujhe mp3 missing"));
             }
-        }, 200);
+        }, 100); 
     }
 
     let hearts = [];
