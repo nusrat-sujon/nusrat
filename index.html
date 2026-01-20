@@ -46,13 +46,17 @@
     const ctx = canvas.getContext('2d');
     let width, height;
 
-    // --- লাইনগুলো (সময় বাড়ানো হয়েছে) ---
+    // --- ডায়নামিক টাইমিং সেটআপ (msg = লেখা, time = কতক্ষণ স্থির থাকবে) ---
+    // মোট সময় মেলাতে ফেড ইন/আউট টাইম বাদে 'time' ভ্যালু দেওয়া হয়েছে।
     const letters = [
-        "হে আমার প্রিয়তমা, আমার প্রেয়সী সুলতানা, আমার সম্রাজ্ঞী হুররাম...",
-        "অহর্নিশি যার বিরহে আমি কাতর...",
-        "আমার সব আনন্দের উৎস, আমার কষ্টের একমাত্র নিরাময় হুররাম।",
-        "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...",
-        "বারবার তোমাকে দেখার তৃষ্ণা আমাকে ব্যাকুল করে তোলে..."
+        { msg: "হে আমার প্রিয়তমা,", time: 1000 },                 // ছোট লাইন
+        { msg: "আমার প্রেয়সী সুলতানা", time: 1500 },               // মাঝারি
+        { msg: "আমার সম্রাজ্ঞী হুররাম...", time: 1500 },            // মাঝারি
+        { msg: "অহর্নিশি যার বিরহে আমি কাতর...", time: 2200 },      // বড় লাইন
+        { msg: "আমার সব আনন্দের উৎস,", time: 1200 },               // ছোট-মাঝারি
+        { msg: "আমার কষ্টের একমাত্র নিরাময় হুররাম।", time: 2500 }, // বড় লাইন
+        { msg: "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...", time: 2800 }, // সবচেয়ে বড়
+        { msg: "বারবার তোমাকে দেখার...", time: 1200 }              // শেষ লাইন
     ];
 
     let state = "idle";
@@ -61,13 +65,10 @@
     let fadeDir = 1;
     let textTimer = 0;
     
-    // ক্যারেকটার পজিশন
     let boyX = -150;
     let girlX = 0;
     let groundY = 0;
     let meetX = 0;
-
-    // স্টারস
     let stars = [];
 
     function resize() {
@@ -98,7 +99,7 @@
             state = "letter";
             animate();
         }).catch(error => {
-            alert("Sultan.mp3 গানটি পাওয়া যাচ্ছে না! দয়া করে চেক করুন।");
+            alert("গান পাওয়া যাচ্ছে না! sultan.mp3 চেক করুন।");
         });
     }
 
@@ -123,7 +124,6 @@
 
     // --- ড্রয়িং ---
     function drawScene() {
-        // আকাশ
         let grad = ctx.createLinearGradient(0, 0, 0, height);
         grad.addColorStop(0, "#0f2027");
         grad.addColorStop(0.5, "#203a43");
@@ -131,7 +131,6 @@
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
 
-        // তারা
         ctx.fillStyle = "white";
         stars.forEach(s => {
             ctx.globalAlpha = Math.abs(Math.sin(Date.now() * 0.002 + s.x));
@@ -139,13 +138,11 @@
         });
         ctx.globalAlpha = 1.0;
 
-        // চাঁদ
         ctx.shadowBlur = 60; ctx.shadowColor = "#fdfd96";
         ctx.fillStyle = "#fff";
         ctx.beginPath(); ctx.arc(100, 100, 45, 0, Math.PI*2); ctx.fill();
         ctx.shadowBlur = 0;
 
-        // মাটি
         ctx.fillStyle = "#000"; 
         ctx.beginPath();
         ctx.moveTo(0, height);
@@ -155,43 +152,31 @@
         ctx.fill();
     }
 
-    // সুজন
     function drawBoy(x, y, isHugging) {
         ctx.save();
         ctx.translate(x, y);
         ctx.fillStyle = "#000";
         let lean = isHugging ? 10 : 0; 
         ctx.beginPath();
-        ctx.moveTo(-15, -130); 
-        ctx.quadraticCurveTo(20 + lean, -130, 25 + lean, -50); 
-        ctx.lineTo(-20 + lean, -50); 
-        ctx.lineTo(-25, -130);
-        ctx.fill();
-        ctx.fillRect(-18, -50, 14, 60); 
-        ctx.fillRect(2, -50, 14, 60); 
+        ctx.moveTo(-15, -130); ctx.quadraticCurveTo(20 + lean, -130, 25 + lean, -50); 
+        ctx.lineTo(-20 + lean, -50); ctx.lineTo(-25, -130); ctx.fill();
+        ctx.fillRect(-18, -50, 14, 60); ctx.fillRect(2, -50, 14, 60); 
         ctx.beginPath(); ctx.arc(0 + lean, -145, 18, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle = "#000"; ctx.lineWidth = 8; ctx.lineCap = "round";
         ctx.beginPath();
-        if(isHugging) {
-            ctx.moveTo(-10, -125); ctx.quadraticCurveTo(30, -120, 55, -100); ctx.stroke();
-        } else {
-            ctx.moveTo(-10, -125); ctx.lineTo(-15, -80); ctx.stroke();
-        }
+        if(isHugging) { ctx.moveTo(-10, -125); ctx.quadraticCurveTo(30, -120, 55, -100); ctx.stroke(); } 
+        else { ctx.moveTo(-10, -125); ctx.lineTo(-15, -80); ctx.stroke(); }
         ctx.restore();
     }
 
-    // নুসরাত
     function drawGirl(x, y, isHugging) {
         ctx.save();
         ctx.translate(x, y);
         ctx.fillStyle = "#000";
         let lean = isHugging ? -10 : 0;
         ctx.beginPath();
-        ctx.moveTo(-12, -120); 
-        ctx.quadraticCurveTo(15, -120, 15, -120); 
-        ctx.lineTo(25 + lean, 0); 
-        ctx.lineTo(-25 + lean, 0); 
-        ctx.fill();
+        ctx.moveTo(-12, -120); ctx.quadraticCurveTo(15, -120, 15, -120); 
+        ctx.lineTo(25 + lean, 0); ctx.lineTo(-25 + lean, 0); ctx.fill();
         ctx.beginPath(); ctx.arc(0 + lean, -135, 16, 0, Math.PI*2); ctx.fill();
         ctx.beginPath();
         let hairX = -10 + lean; 
@@ -202,15 +187,11 @@
         ctx.fill();
         ctx.strokeStyle = "#000"; ctx.lineWidth = 6; ctx.lineCap = "round";
         ctx.beginPath();
-        if(isHugging) {
-            ctx.moveTo(5, -120); ctx.quadraticCurveTo(-20, -115, -45, -100); ctx.stroke();
-        } else {
-            ctx.moveTo(5, -120); ctx.lineTo(10, -80); ctx.stroke();
-        }
+        if(isHugging) { ctx.moveTo(5, -120); ctx.quadraticCurveTo(-20, -115, -45, -100); ctx.stroke(); } 
+        else { ctx.moveTo(5, -120); ctx.lineTo(10, -80); ctx.stroke(); }
         ctx.restore();
     }
 
-    // ডায়ালগ বাবল
     function drawBubble(text, x, y, alignLeft) {
         let fontSize = Math.min(20, width / 26);
         ctx.font = "600 " + fontSize + "px 'Hind Siliguri'";
@@ -236,20 +217,14 @@
         ctx.shadowBlur = 0;
         
         ctx.beginPath();
-        if (alignLeft) {
-             ctx.moveTo(bx + w - 20, by + h); ctx.lineTo(x - 10, y - 150); ctx.lineTo(bx + w - 40, by + h);
-        } else {
-             ctx.moveTo(bx + 20, by + h); ctx.lineTo(x + 10, y - 150); ctx.lineTo(bx + 40, by + h);
-        }
+        if (alignLeft) { ctx.moveTo(bx + w - 20, by + h); ctx.lineTo(x - 10, y - 150); ctx.lineTo(bx + w - 40, by + h); } 
+        else { ctx.moveTo(bx + 20, by + h); ctx.lineTo(x + 10, y - 150); ctx.lineTo(bx + 40, by + h); }
         ctx.fill();
 
         ctx.fillStyle = "#c2185b";
         ctx.textAlign = "center";
         let textY = by + lineHeight;
-        lines.forEach(line => {
-            ctx.fillText(line, bx + w/2, textY - 5);
-            textY += lineHeight;
-        });
+        lines.forEach(line => { ctx.fillText(line, bx + w/2, textY - 5); textY += lineHeight; });
     }
 
     // --- এনিমেশন লুপ ---
@@ -257,7 +232,7 @@
         ctx.clearRect(0, 0, width, height);
         drawScene();
 
-        // ১. চিঠি পড়া (টাইমিং স্লো করা হয়েছে)
+        // ১. চিঠি পড়া (ডায়নামিক টাইমিং)
         if(state === "letter") {
             drawBoy(width/2 - (width < 500 ? 100 : 250), groundY, false);
             drawGirl(width/2 + (width < 500 ? 100 : 250), groundY, false);
@@ -268,21 +243,25 @@
             ctx.textAlign = "center";
             ctx.shadowColor = "#ff4081"; ctx.shadowBlur = 15;
             
+            // letters[textIdx].msg ব্যবহার করা হচ্ছে
+            let currentText = letters[textIdx].msg;
             let maxWidth = width * 0.9;
-            let lines = wrapText(ctx, letters[textIdx], maxWidth);
+            let lines = wrapText(ctx, currentText, maxWidth);
             let startY = height/3;
             lines.forEach((line, i) => {
                 ctx.fillText(line, width/2, startY + (i * (fontSize + 10)));
             });
             ctx.shadowBlur = 0;
 
-            // --- পরিবর্তন: সময় বাড়ানো হয়েছে ---
             if(fadeDir === 1) {
-                textAlpha += 0.01; // ধীরে আসবে (আগে ০.০১৫ ছিল)
-                // লেখা স্ক্রিনে থাকবে ৪.৫ সেকেন্ড (আগে ২.৫ ছিল) = ২ সেকেন্ড বেড়েছে
-                if(textAlpha >= 1) { fadeDir = 0; setTimeout(() => fadeDir = -1, 4500); } 
+                textAlpha += 0.03; // ফেড ইন (দ্রুত)
+                if(textAlpha >= 1) { 
+                    fadeDir = 0; 
+                    // নির্দিষ্ট লাইনের জন্য নির্দিষ্ট সময় অপেক্ষা
+                    setTimeout(() => fadeDir = -1, letters[textIdx].time); 
+                } 
             } else if(fadeDir === -1) {
-                textAlpha -= 0.02; // ধীরে মুছবে
+                textAlpha -= 0.03; // ফেড আউট
                 if(textAlpha <= 0) {
                     textIdx++;
                     if(textIdx >= letters.length) state = "walking";
@@ -295,10 +274,8 @@
         else if(state === "walking") {
             if(boyX < meetX - 25) boyX += 5;
             if(girlX > meetX + 25) girlX -= 5;
-            
             drawBoy(boyX, groundY, false);
             drawGirl(girlX, groundY, false);
-
             if(Math.abs(boyX - (meetX - 25)) < 6 && Math.abs(girlX - (meetX + 25)) < 6) {
                 state = "hugging";
                 changeMusic();
@@ -309,38 +286,28 @@
         else if(state === "hugging") {
             drawBoy(meetX - 15, groundY, true);
             drawGirl(meetX + 15, groundY, true);
-
             textTimer++;
-
             if(textTimer > 50 && textTimer < 350) {
                 drawBubble("আমি তোমাকে ভালোবাসি নুসরাত, তুমি আমার সব। ❤️", meetX, groundY, true);
-            }
-            else if(textTimer > 350) {
+            } else if(textTimer > 350) {
                 drawBubble("আমিও আপনাকে ভালোবাসি। 💑", meetX, groundY, false);
                 if(Math.random() < 0.3) createHeart();
                 updateHearts();
             }
         }
-
         requestAnimationFrame(animate);
     }
 
-    // --- মিউজিক পরিবর্তন ---
     function changeMusic() {
         const s = document.getElementById('sultan');
         const t = document.getElementById('tujhe');
-
         let fadeOut = setInterval(() => {
             if(s.volume > 0.1) s.volume -= 0.1;
             else {
-                clearInterval(fadeOut);
-                s.pause();
-                
-                t.volume = 0;
-                t.play().then(() => {
+                clearInterval(fadeOut); s.pause();
+                t.volume = 0; t.play().then(() => {
                     let fadeIn = setInterval(() => {
-                        if(t.volume < 0.9) t.volume += 0.1;
-                        else clearInterval(fadeIn);
+                        if(t.volume < 0.9) t.volume += 0.1; else clearInterval(fadeIn);
                     }, 200);
                 }).catch(e => console.log("Tujhe mp3 missing"));
             }
@@ -353,16 +320,12 @@
     }
     function updateHearts() {
         hearts.forEach((h, i) => {
-            ctx.globalAlpha = h.a;
-            ctx.fillStyle = "#ff4081";
-            ctx.font = h.s + "px Arial";
-            ctx.fillText("❤️", h.x, h.y);
-            h.y -= h.sp; h.a -= 0.01;
+            ctx.globalAlpha = h.a; ctx.fillStyle = "#ff4081"; ctx.font = h.s + "px Arial";
+            ctx.fillText("❤️", h.x, h.y); h.y -= h.sp; h.a -= 0.01;
             if(h.a <= 0) hearts.splice(i, 1);
         });
         ctx.globalAlpha = 1;
     }
-
 </script>
 </body>
 </html>
