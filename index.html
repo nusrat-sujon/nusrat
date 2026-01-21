@@ -46,17 +46,18 @@
     const ctx = canvas.getContext('2d');
     let width, height;
 
-    // --- ৮টি লাইন (অক্ষরের অনুপাতে ২১ সেকেন্ড ভাগ করা হয়েছে) ---
+    // --- ১৯ সেকেন্ডের নতুন টাইমিং সেটআপ ---
     const letters = [
-        { msg: "হে আমার প্রিয়তমা,", time: 1800 },
-        { msg: "আমার প্রেয়সী সুলতানা", time: 2200 },
-        { msg: "আমার সম্রাজ্ঞী হুররাম...", time: 2400 },
-        { msg: "অহর্নিশি যার বিরহে আমি কাতর...", time: 2000 },
-        { msg: "আমার সব আনন্দের উৎস,", time: 100 },
-        { msg: "আমার কষ্টের একমাত্র নিরাময় হুররাম।", time: 400 },
-        { msg: "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...", time: 800 },
-        { msg: "তোমাকে", time: 50 }
+        { msg: "হে আমার প্রিয়তমা,", time: 1600 },
+        { msg: "আমার প্রেয়সী সুলতানা", time: 2000 },
+        { msg: "আমার সম্রাজ্ঞী হুররাম...", time: 2100 },
+        { msg: "অহর্নিশি যার বিরহে আমি কাতর...", time: 2900 }, // একটু বড়
+        { msg: "আমার সব আনন্দের উৎস,", time: 2000 },
+        { msg: "আমার কষ্টের একমাত্র নিরাময় হুররাম।", time: 3200 }, // বড় লাইন
+        { msg: "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...", time: 4600 }, // সবচেয়ে বড়
+        { msg: "তোমাকে", time: 600 } // খুব দ্রুত
     ];
+    // মোট = ১৯০০০ ms (১৯ সেকেন্ড)
 
     let state = "idle";
     let textIdx = 0;
@@ -102,7 +103,6 @@
         });
     }
 
-    // --- টেক্সট র‍্যাপিং ---
     function wrapText(context, text, maxWidth) {
         let words = text.split(' ');
         let lines = [];
@@ -121,7 +121,6 @@
         return lines;
     }
 
-    // --- ড্রয়িং ---
     function drawScene() {
         let grad = ctx.createLinearGradient(0, 0, 0, height);
         grad.addColorStop(0, "#0f2027");
@@ -151,9 +150,17 @@
         ctx.fill();
     }
 
+    // --- সুজন (নাম সহ) ---
     function drawBoy(x, y, isHugging) {
         ctx.save();
         ctx.translate(x, y);
+        
+        // নাম
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 16px 'Hind Siliguri'";
+        ctx.textAlign = "center";
+        ctx.fillText("সুজন", 0, -165); // মাথার উপরে
+
         ctx.fillStyle = "#000";
         let lean = isHugging ? 10 : 0; 
         ctx.beginPath();
@@ -168,9 +175,17 @@
         ctx.restore();
     }
 
+    // --- নুসরাত (নাম সহ) ---
     function drawGirl(x, y, isHugging) {
         ctx.save();
         ctx.translate(x, y);
+
+        // নাম
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 16px 'Hind Siliguri'";
+        ctx.textAlign = "center";
+        ctx.fillText("নুসরাত", 0, -155); // মাথার উপরে
+
         ctx.fillStyle = "#000";
         let lean = isHugging ? -10 : 0;
         ctx.beginPath();
@@ -231,7 +246,7 @@
         ctx.clearRect(0, 0, width, height);
         drawScene();
 
-        // ১. চিঠি পড়া (টাইমিং কাস্টমাইজড)
+        // ১. চিঠি পড়া (১৯ সেকেন্ড)
         if(state === "letter") {
             drawBoy(width/2 - (width < 500 ? 100 : 250), groundY, false);
             drawGirl(width/2 + (width < 500 ? 100 : 250), groundY, false);
@@ -252,13 +267,13 @@
             ctx.shadowBlur = 0;
 
             if(fadeDir === 1) {
-                textAlpha += 0.03; 
+                textAlpha += 0.04; // একটু ফাস্ট ফেড ইন
                 if(textAlpha >= 1) { 
                     fadeDir = 0; 
                     setTimeout(() => fadeDir = -1, letters[textIdx].time); 
                 } 
             } else if(fadeDir === -1) {
-                textAlpha -= 0.03; 
+                textAlpha -= 0.04; 
                 if(textAlpha <= 0) {
                     textIdx++;
                     if(textIdx >= letters.length) state = "walking";
@@ -267,29 +282,28 @@
             }
         }
 
-        // ২. দৌড়ে কাছে আসা (স্লো করা হয়েছে: 2.5 স্পিড)
+        // ২. হেঁটে কাছে আসা (স্লো করা হয়েছে: গতি ০.৮)
         else if(state === "walking") {
-            if(boyX < meetX - 25) boyX += 2.5;
-            if(girlX > meetX + 25) girlX -= 2.5;
+            if(boyX < meetX - 25) boyX += 0.8; // হাটার গতি (স্লো)
+            if(girlX > meetX + 25) girlX -= 0.8;
             drawBoy(boyX, groundY, false);
             drawGirl(girlX, groundY, false);
-            if(Math.abs(boyX - (meetX - 25)) < 6 && Math.abs(girlX - (meetX + 25)) < 6) {
+            
+            if(Math.abs(boyX - (meetX - 25)) < 2 && Math.abs(girlX - (meetX + 25)) < 2) {
                 state = "hugging";
                 changeMusic();
             }
         }
 
-        // ৩. জড়িয়ে ধরা (৫ সেকেন্ডের বেশি সময় দেওয়া হয়েছে)
+        // ৩. জড়িয়ে ধরা
         else if(state === "hugging") {
             drawBoy(meetX - 15, groundY, true);
             drawGirl(meetX + 15, groundY, true);
             textTimer++;
 
-            // সুজনের ডায়ালগ (৬০ ফ্রেম থেকে ৩৬০ ফ্রেম = ৫ সেকেন্ডের বেশি)
             if(textTimer > 60 && textTimer < 400) {
                 drawBubble("আমি তোমাকে ভালোবাসি নুসরাত, তুমি আমার সব। ❤️", meetX, groundY, true);
             } 
-            // নুসরাতের ডায়ালগ
             else if(textTimer > 400) {
                 drawBubble("আমিও আপনাকে ভালোবাসি। 💑", meetX, groundY, false);
                 if(Math.random() < 0.3) createHeart();
