@@ -46,7 +46,7 @@
     const ctx = canvas.getContext('2d');
     let width, height;
 
-    // --- ১৯ সেকেন্ডের টাইমিং ---
+    // --- ১৯ সেকেন্ডের টাইমিং (অক্ষর অনুযায়ী) ---
     const letters = [
         { msg: "হে আমার প্রিয়তমা,", time: 1600 },
         { msg: "আমার প্রেয়সী সুলতানা", time: 2000 },
@@ -54,7 +54,7 @@
         { msg: "অহর্নিশি যার বিরহে আমি কাতর...", time: 2900 },
         { msg: "আমার সব আনন্দের উৎস,", time: 2000 },
         { msg: "আমার কষ্টের একমাত্র নিরাময় হুররাম।", time: 3200 },
-        { msg: "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...", time: 4600 },
+        { msg: "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...", time: 4600 }, 
     ];
 
     let state = "idle";
@@ -276,7 +276,7 @@
                     textIdx++;
                     if(textIdx >= letters.length) {
                         state = "walking";
-                        changeMusic(); // হাঁটা শুরু হলেই গান চেঞ্জ হবে
+                        changeMusic(); // লেখা শেষ হওয়ামাত্রই গান চেঞ্জ হবে
                     }
                     else fadeDir = 1;
                 }
@@ -285,14 +285,13 @@
 
         // ২. হেঁটে কাছে আসা
         else if(state === "walking") {
-            if(boyX < meetX - 25) boyX += 0.8; // স্লো হাটার গতি
+            if(boyX < meetX - 25) boyX += 0.8; // স্লো হাঁটা
             if(girlX > meetX + 25) girlX -= 0.8;
             drawBoy(boyX, groundY, false);
             drawGirl(girlX, groundY, false);
             
             if(Math.abs(boyX - (meetX - 25)) < 2 && Math.abs(girlX - (meetX + 25)) < 2) {
                 state = "hugging";
-                // changeMusic(); // এখান থেকে সরিয়ে উপরে দেওয়া হয়েছে
             }
         }
 
@@ -314,20 +313,16 @@
         requestAnimationFrame(animate);
     }
 
+    // --- মিউজিক পরিবর্তন (Instant Change) ---
     function changeMusic() {
         const s = document.getElementById('sultan');
         const t = document.getElementById('tujhe');
-        let fadeOut = setInterval(() => {
-            if(s.volume > 0.1) s.volume -= 0.1;
-            else {
-                clearInterval(fadeOut); s.pause();
-                t.volume = 0; t.play().then(() => {
-                    let fadeIn = setInterval(() => {
-                        if(t.volume < 0.9) t.volume += 0.1; else clearInterval(fadeIn);
-                    }, 200);
-                }).catch(e => console.log("Tujhe mp3 missing"));
-            }
-        }, 100); 
+        
+        // ফেইড আউট বাদ দিয়ে সরাসরি কাট করা হলো যাতে গ্যাপ না থাকে
+        s.pause(); 
+        t.currentTime = 0; 
+        t.volume = 1.0; 
+        t.play().catch(e => console.log("Tujhe mp3 missing"));
     }
 
     let hearts = [];
