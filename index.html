@@ -46,18 +46,16 @@
     const ctx = canvas.getContext('2d');
     let width, height;
 
-    // --- ১৯ সেকেন্ডের নতুন টাইমিং সেটআপ ---
+    // --- ১৯ সেকেন্ডের টাইমিং ---
     const letters = [
         { msg: "হে আমার প্রিয়তমা,", time: 1600 },
         { msg: "আমার প্রেয়সী সুলতানা", time: 2000 },
         { msg: "আমার সম্রাজ্ঞী হুররাম...", time: 2100 },
-        { msg: "অহর্নিশি যার বিরহে আমি কাতর...", time: 2900 }, // একটু বড়
+        { msg: "অহর্নিশি যার বিরহে আমি কাতর...", time: 2900 },
         { msg: "আমার সব আনন্দের উৎস,", time: 2000 },
-        { msg: "আমার কষ্টের একমাত্র নিরাময় হুররাম।", time: 3200 }, // বড় লাইন
-        { msg: "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...", time: 4600 }, // সবচেয়ে বড়
-        { msg: "তোমাকে", time: 600 } // খুব দ্রুত
+        { msg: "আমার কষ্টের একমাত্র নিরাময় হুররাম।", time: 3200 },
+        { msg: "চাঁদনী রাতে তোমার চুলের মধুর গন্ধ মনে পড়ে যায়...", time: 4600 },
     ];
-    // মোট = ১৯০০০ ms (১৯ সেকেন্ড)
 
     let state = "idle";
     let textIdx = 0;
@@ -159,7 +157,7 @@
         ctx.fillStyle = "#fff";
         ctx.font = "bold 16px 'Hind Siliguri'";
         ctx.textAlign = "center";
-        ctx.fillText("সুজন", 0, -165); // মাথার উপরে
+        ctx.fillText("সুজন", 0, -165); 
 
         ctx.fillStyle = "#000";
         let lean = isHugging ? 10 : 0; 
@@ -184,7 +182,7 @@
         ctx.fillStyle = "#fff";
         ctx.font = "bold 16px 'Hind Siliguri'";
         ctx.textAlign = "center";
-        ctx.fillText("নুসরাত", 0, -155); // মাথার উপরে
+        ctx.fillText("নুসরাত", 0, -155); 
 
         ctx.fillStyle = "#000";
         let lean = isHugging ? -10 : 0;
@@ -246,7 +244,7 @@
         ctx.clearRect(0, 0, width, height);
         drawScene();
 
-        // ১. চিঠি পড়া (১৯ সেকেন্ড)
+        // ১. চিঠি পড়া
         if(state === "letter") {
             drawBoy(width/2 - (width < 500 ? 100 : 250), groundY, false);
             drawGirl(width/2 + (width < 500 ? 100 : 250), groundY, false);
@@ -267,7 +265,7 @@
             ctx.shadowBlur = 0;
 
             if(fadeDir === 1) {
-                textAlpha += 0.04; // একটু ফাস্ট ফেড ইন
+                textAlpha += 0.04; 
                 if(textAlpha >= 1) { 
                     fadeDir = 0; 
                     setTimeout(() => fadeDir = -1, letters[textIdx].time); 
@@ -276,22 +274,25 @@
                 textAlpha -= 0.04; 
                 if(textAlpha <= 0) {
                     textIdx++;
-                    if(textIdx >= letters.length) state = "walking";
+                    if(textIdx >= letters.length) {
+                        state = "walking";
+                        changeMusic(); // হাঁটা শুরু হলেই গান চেঞ্জ হবে
+                    }
                     else fadeDir = 1;
                 }
             }
         }
 
-        // ২. হেঁটে কাছে আসা (স্লো করা হয়েছে: গতি ০.৮)
+        // ২. হেঁটে কাছে আসা
         else if(state === "walking") {
-            if(boyX < meetX - 25) boyX += 0.8; // হাটার গতি (স্লো)
+            if(boyX < meetX - 25) boyX += 0.8; // স্লো হাটার গতি
             if(girlX > meetX + 25) girlX -= 0.8;
             drawBoy(boyX, groundY, false);
             drawGirl(girlX, groundY, false);
             
             if(Math.abs(boyX - (meetX - 25)) < 2 && Math.abs(girlX - (meetX + 25)) < 2) {
                 state = "hugging";
-                changeMusic();
+                // changeMusic(); // এখান থেকে সরিয়ে উপরে দেওয়া হয়েছে
             }
         }
 
